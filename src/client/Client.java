@@ -55,16 +55,11 @@ public class Client {
                     GUIController gui = new GUIController();
                     ClientHandler handler = new ClientHandler(socket, gui);
                     handler.start();
-                    clients.add(handler);
+                    //clients.add(handler);
+                    cFrame.startBtn.setSelected(false);
                 }catch(IOException ex){
                     System.out.println("Could not create clienthandler");
-                }
-                /*
-                JFrame frame = new JFrame("Participant records");
-                frame.setContentPane(mPage);
-                frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-                frame.setVisible(true);
-                */
+                }   
             }
         });
         
