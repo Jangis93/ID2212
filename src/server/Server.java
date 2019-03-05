@@ -68,10 +68,9 @@ public class Server {
         while(true){
             System.out.println("running");
             try{
-                if(socket != null){
-                    Socket client = socket.accept();
-                    
-                }
+                Socket client = socket.accept();
+                ConnectionHandler handler = new ConnectionHandler(this, client);
+                handler.start();
             }catch(IOException e){
                 e.printStackTrace();
             }
