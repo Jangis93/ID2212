@@ -6,6 +6,7 @@
 package client;
 
 import java.io.BufferedReader;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
@@ -40,16 +41,12 @@ public class ClientHandler extends Thread{
     public void run(){
         
         boolean running = true;
+
         while(running){
-            if(gui.connected){
-                
-                /*
-                try{
-                    // read from the server output
-                }catch(){
-                    
-                }
-                */
+            if(gui.connected){       
+                out.write("testing testing");
+                out.write("\n");
+                out.flush(); 
             }else{
                 // close the connection
                 try{
