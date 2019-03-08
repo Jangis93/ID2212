@@ -34,7 +34,7 @@ public class Server {
     
     public static void main(String[] args){
         Server server = new Server();
-        if(server.isEmpty()){
+        if(!server.isEmpty()){
             try{
                 server.fillDatabase();
             }catch(Exception e){
@@ -50,8 +50,6 @@ public class Server {
             Class.forName("org.apache.derby.jdbc.EmbeddedDriver");
             connection = DriverManager.getConnection(JDBC_DRIVER, "michaela", "michaela");
             socket = new ServerSocket(PORT, 0, InetAddress.getByName(null));
-            System.out.println("Created server");
-            fillDatabase();
         }catch(IOException e){
             e.printStackTrace();
         }catch(ClassNotFoundException  ce){
@@ -66,10 +64,9 @@ public class Server {
     private void listen(){
         
         while(true){
-            System.out.println("running");
             try{
                 Socket client = socket.accept();
-                ConnectionHandler handler = new ConnectionHandler(this, client);
+                ConnectionHandler handler = new ConnectionHandler(this, client, connection);
                 handler.start();
             }catch(IOException e){
                 e.printStackTrace();
@@ -77,7 +74,7 @@ public class Server {
         }
     }
     
-        private void fillDatabase() throws Exception{
+    private void fillDatabase() throws Exception{
         BufferedReader TSVFile = new BufferedReader(new FileReader(tsvPath));
         String dataRow;
         String query = "INSERT INTO PARTICIPANTS (ID, NAME, GENDER, BIRTHDAY, HEIGHT, WEIGHT, SPORT, COUNTRY)"
@@ -100,7 +97,7 @@ public class Server {
                         break;
                     case 1:
                         String tmp = tokens[1].substring(0, tokens[1].length()-2);
-                        name = tmp + tokens[2];
+                        name = tmp + " " + tokens[2];
                         break;
                     case 2: gender = tokens[3];
                         break;
@@ -113,13 +110,9 @@ public class Server {
                     case 6: weight = Float.parseFloat(tokens[7]);
                         break;                         
                 }
-                if(tokens.length == 8){
-                   System.out.println(tokens.length); 
-                   System.out.println(Arrays.toString(tokens));
-                }
-                 
+
                 if(tokens.length - 8 > 1){
-                    sport = tokens[8] + tokens[9];
+                    sport = tokens[8] + " " +  tokens[9];
                 }else{
                     sport = tokens[8];
                 }
@@ -133,6 +126,7 @@ public class Server {
             pState.setFloat(6, weight);
             pState.setString(7, sport);
             pState.setString(8, country);
+            pState.executeUpdate();
                     
         }
         pState.close();
