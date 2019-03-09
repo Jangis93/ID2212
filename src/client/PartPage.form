@@ -19,19 +19,19 @@
           <Group type="102" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                  <Component id="jScrollPane1" pref="497" max="32767" attributes="0"/>
                   <Group type="102" attributes="0">
                       <Component id="prevBtn" min="-2" pref="103" max="-2" attributes="0"/>
                       <EmptySpace type="separate" max="-2" attributes="0"/>
-                      <Component id="Next" min="-2" pref="94" max="-2" attributes="0"/>
-                      <EmptySpace max="32767" attributes="0"/>
+                      <Component id="nxtBtn" min="-2" pref="94" max="-2" attributes="0"/>
+                      <EmptySpace pref="162" max="32767" attributes="0"/>
                       <Component id="delBtn" min="-2" pref="101" max="-2" attributes="0"/>
-                      <EmptySpace type="separate" max="-2" attributes="0"/>
-                      <Component id="Save" min="-2" pref="102" max="-2" attributes="0"/>
+                      <EmptySpace min="-2" pref="31" max="-2" attributes="0"/>
+                      <Component id="updtBtn" min="-2" pref="102" max="-2" attributes="0"/>
                   </Group>
+                  <Component id="jScrollPane1" max="32767" attributes="0"/>
                   <Component id="textField" max="32767" attributes="0"/>
               </Group>
-              <EmptySpace pref="26" max="32767" attributes="0"/>
+              <EmptySpace pref="33" max="32767" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -43,9 +43,9 @@
               <EmptySpace min="-2" pref="31" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
                   <Component id="prevBtn" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="Next" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="nxtBtn" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="delBtn" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="Save" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="updtBtn" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace min="-2" pref="36" max="-2" attributes="0"/>
               <Component id="textField" min="-2" pref="49" max="-2" attributes="0"/>
@@ -141,12 +141,12 @@
         <AuxValue name="JavaCodeGenerator_VariableModifier" type="java.lang.Integer" value="1"/>
       </AuxValues>
     </Component>
-    <Component class="javax.swing.JToggleButton" name="Next">
+    <Component class="javax.swing.JToggleButton" name="nxtBtn">
       <Properties>
         <Property name="label" type="java.lang.String" value="Next"/>
       </Properties>
       <Events>
-        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="NextActionPerformed"/>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="nxtBtnActionPerformed"/>
       </Events>
       <AuxValues>
         <AuxValue name="JavaCodeGenerator_VariableModifier" type="java.lang.Integer" value="1"/>
@@ -160,7 +160,7 @@
         <AuxValue name="JavaCodeGenerator_VariableModifier" type="java.lang.Integer" value="1"/>
       </AuxValues>
     </Component>
-    <Component class="javax.swing.JToggleButton" name="Save">
+    <Component class="javax.swing.JToggleButton" name="updtBtn">
       <Properties>
         <Property name="label" type="java.lang.String" value="Update"/>
       </Properties>

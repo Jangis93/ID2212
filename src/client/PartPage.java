@@ -10,14 +10,23 @@ package client;
  * @author Michaela
  */
 public class PartPage extends javax.swing.JPanel {
-
+    private int presentedRow;
     /**
      * Creates new form PartPage
      */
     public PartPage() {
+        //this.presentedRow = chosenRow;
         initComponents();
     }
-
+    
+    public void setRow(int presentedRow){
+        this.presentedRow = presentedRow;
+    }
+    
+    public int getRow(){
+        return presentedRow;
+    }
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -30,9 +39,9 @@ public class PartPage extends javax.swing.JPanel {
         jScrollPane1 = new javax.swing.JScrollPane();
         recordTable = new javax.swing.JTable();
         prevBtn = new javax.swing.JToggleButton();
-        Next = new javax.swing.JToggleButton();
+        nxtBtn = new javax.swing.JToggleButton();
         delBtn = new javax.swing.JToggleButton();
-        Save = new javax.swing.JToggleButton();
+        updtBtn = new javax.swing.JToggleButton();
         textField = new javax.swing.JTextField();
 
         recordTable.setModel(new javax.swing.table.DefaultTableModel(
@@ -63,16 +72,16 @@ public class PartPage extends javax.swing.JPanel {
             }
         });
 
-        Next.setLabel("Next");
-        Next.addActionListener(new java.awt.event.ActionListener() {
+        nxtBtn.setLabel("Next");
+        nxtBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                NextActionPerformed(evt);
+                nxtBtnActionPerformed(evt);
             }
         });
 
         delBtn.setLabel("Delete");
 
-        Save.setLabel("Update");
+        updtBtn.setLabel("Update");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -81,17 +90,17 @@ public class PartPage extends javax.swing.JPanel {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 497, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(prevBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 103, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(18, 18, 18)
-                        .addComponent(Next, javax.swing.GroupLayout.PREFERRED_SIZE, 94, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(nxtBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 94, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 162, Short.MAX_VALUE)
                         .addComponent(delBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 101, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(Save, javax.swing.GroupLayout.PREFERRED_SIZE, 102, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(31, 31, 31)
+                        .addComponent(updtBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 102, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jScrollPane1)
                     .addComponent(textField))
-                .addContainerGap(26, Short.MAX_VALUE))
+                .addContainerGap(33, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -101,9 +110,9 @@ public class PartPage extends javax.swing.JPanel {
                 .addGap(31, 31, 31)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(prevBtn)
-                    .addComponent(Next)
+                    .addComponent(nxtBtn)
                     .addComponent(delBtn)
-                    .addComponent(Save))
+                    .addComponent(updtBtn))
                 .addGap(36, 36, 36)
                 .addComponent(textField, javax.swing.GroupLayout.PREFERRED_SIZE, 49, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(23, Short.MAX_VALUE))
@@ -114,18 +123,18 @@ public class PartPage extends javax.swing.JPanel {
         // TODO add your handling code here:
     }//GEN-LAST:event_prevBtnActionPerformed
 
-    private void NextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NextActionPerformed
+    private void nxtBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_nxtBtnActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_NextActionPerformed
+    }//GEN-LAST:event_nxtBtnActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    public javax.swing.JToggleButton Next;
-    public javax.swing.JToggleButton Save;
     public javax.swing.JToggleButton delBtn;
     private javax.swing.JScrollPane jScrollPane1;
+    public javax.swing.JToggleButton nxtBtn;
     public javax.swing.JToggleButton prevBtn;
     public javax.swing.JTable recordTable;
     public javax.swing.JTextField textField;
+    public javax.swing.JToggleButton updtBtn;
     // End of variables declaration//GEN-END:variables
 }
