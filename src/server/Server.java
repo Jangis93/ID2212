@@ -96,7 +96,7 @@ public class Server {
                     case 0: ID = Integer.parseInt(tokens[0]);
                         break;
                     case 1:
-                        String tmp = tokens[1].substring(0, tokens[1].length()-2);
+                        String tmp = tokens[1].substring(0, tokens[1].length()-1);
                         name = tmp + " " + tokens[2];
                         break;
                     case 2: gender = tokens[3];
