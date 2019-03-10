@@ -45,6 +45,13 @@ public class ClientHandler extends Thread{
     }
     
     public void killThread(){
+        try{
+            out.close();
+            in.close();
+            socket.close(); 
+        }catch(IOException e){
+            e.printStackTrace();
+        }
         running = false;
     }
     
@@ -54,7 +61,6 @@ public class ClientHandler extends Thread{
     
     public void run(){
 
-        //String request = "";
         String answer = "";
         String total = "";
         while(running){
@@ -65,12 +71,9 @@ public class ClientHandler extends Thread{
                         writeSocket("HTTP/1.0 100 CONTINUE");
                         if(requestQueue.getLast().equals("GET")){
                             while((answer = in.readLine()) != null){
-                            System.out.println("inside");
                                 if(answer.isEmpty()){
-                                    System.out.println("error");
                                     break;
                                 }else{
-                                    System.out.println("answer: " + answer);
                                     total += answer + "\n";
                                 }       
                             }
@@ -114,56 +117,7 @@ public class ClientHandler extends Thread{
             }catch(IOException e){
                 
             }
-            /*
-            try{
-                if((answer = in.readLine()) != null){
-                    if(answer.equals("HTTP/1.0 200 OK")){
-                        writeSocket("OK");
-                        
-                        while((answer = in.readLine()) != null){
-                            System.out.println("inside");
-                            if(answer.isEmpty()){
-                                System.out.println("error");
-                                break;
-                            }else if(answer.equals("HTTP/1.0 204 NO CONTENT")){
-                                System.out.println("Delete went through");
-                                new Thread(new Runnable() {
-                                    @Override
-                                    public void run(){
-                                        String t = " ";
-                                        String request = requestQueue.pollLast();
-                                        gui.serverResponse(request.split(" ")[0], t);
-                                    }
-                                }).start();
-                            }else{
-                                    System.out.println("answer: " + answer);
-                                    total += answer + "\n";
-                                }       
-                            }
 
-                        //System.out.println(total);
-                        String t = total;
-                        new Thread(new Runnable() {
-                            @Override
-                            public void run(){
-                                String request = requestQueue.pollLast();
-                                gui.serverResponse(request, t);
-                            }
-                        }).start();  
-                
-                    }else{
-                        in.close();
-                        out.close();
-                        socket.close();
-                        // set error message that server has closed!
-                    }
-                    
-                }
-            }catch(IOException e){
-                e.printStackTrace();
-            }
-            */
-            
         }
     }
     
@@ -171,12 +125,10 @@ public class ClientHandler extends Thread{
     Method for GUI controller to call when needing to do invoke server communication
     */
     public void serverCall(String request){
-        System.out.println("servercall");
         requestQueue.addFirst(request.split(" ")[0]);
         out.write(request);
         out.write("\n");
         out.flush();
-        //writeSocket(request);
     }
     
     private void writeSocket(String request){

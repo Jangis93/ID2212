@@ -30,6 +30,7 @@ public class GUIController extends Thread {
     private MainPage mPage;
     private PartPage pPage;
     private StatsPage sPage;
+    private AddPage aPage;
     
     public boolean connected;
     private final int PORT = 4444;
@@ -41,6 +42,7 @@ public class GUIController extends Thread {
         mPage = new MainPage();
         pPage = new PartPage();
         sPage = new StatsPage();
+        aPage = new AddPage();
         
         data = new ArrayList();
         updateList = new ConcurrentLinkedDeque<String>(); 
@@ -79,7 +81,16 @@ public class GUIController extends Thread {
     }
     
     private void eventListener(){
- 
+        
+        mPage.addBtn.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e){
+                int[] frameSize = new int[]{750, 300};
+                startNewFrame(aPage, "Add Participant", frameSize);
+                mPage.addBtn.setSelected(false);
+            }
+        });
+        
         mPage.cntBtn.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e){
@@ -96,13 +107,16 @@ public class GUIController extends Thread {
                     }
                 }else{
                     String request = "GET";
-                    new Thread(new Runnable() {
-                    @Override
-                    public void run(){
-                        handler.serverCall(request);
+                    if(connected){
+                        new Thread(new Runnable() {
+                        @Override
+                        public void run(){
+                            handler.serverCall(request);
+                        }
+                        }).start();
+                    }else{
+                        mPage.msgField.setText("You are not connected to the server!");
                     }
-                    }).start();
-                    
                 }
                 mPage.cntBtn.setSelected(false);
             }
@@ -114,8 +128,11 @@ public class GUIController extends Thread {
 
                 if(handler == null){
                     mPage.msgField.setText("You have not connected to the server yet!");
-                }else if(!handler.getStatus()){
+                }else if(handler.getStatus()){
                     handler.killThread();
+                    mPage.cntBtn.setText("Connect");
+                    mPage.msgField.setText("you are now disconnected from the server.");
+                    connected = false;
                 }
                 mPage.discBtn.setSelected(false);
             }
@@ -202,26 +219,31 @@ public class GUIController extends Thread {
             public void actionPerformed(ActionEvent e){
                 int row = pPage.getRow();
                 
-                // store request to do when server has sucessfully handle the request
-                String updateRequest = row + " " + -1;
-                updateList.addFirst(updateRequest);
-                
-                // Adjust the GUI to visualize the deletion
-                DefaultTableModel model = (DefaultTableModel) pPage.recordTable.getModel();
-                model.removeRow(0);
-                Object[] ob = processData(data.get(row + 1));
-                model.insertRow(0, ob);
-                pPage.recordTable.setModel(model);
-                
-                // setup the server connection in the communication thread
-                String recordID = data.get(row).split(" ")[0];
-                String request = "DELETE " + recordID;
-                new Thread(new Runnable() {
+                if(connected){
+                    // store request to do when server has sucessfully handle the request
+                    String updateRequest = row + " " + -1;
+                    updateList.addFirst(updateRequest);
+
+                    // Adjust the GUI to visualize the deletion
+                    DefaultTableModel model = (DefaultTableModel) pPage.recordTable.getModel();
+                    model.removeRow(0);
+                    Object[] ob = processData(data.get(row + 1));
+                    model.insertRow(0, ob);
+                    pPage.recordTable.setModel(model);
+
+                    // setup the server connection in the communication thread
+                    String recordID = data.get(row).split(" ")[0];
+                    String request = "DELETE " + recordID;
+                    new Thread(new Runnable() {
                     @Override
                     public void run(){
                         handler.serverCall(request);
                     }
-                }).start();
+                    }).start();
+                }else{
+                    pPage.textField.setText("You are not connected to the server!");
+                }
+                
                 pPage.delBtn.setSelected(false);
             }
         });
@@ -240,23 +262,31 @@ public class GUIController extends Thread {
                 }else if(newRecord[1].trim().equals(record)){
                     pPage.textField.setText("You have not updated the record." + "\n" + "Don't forget to press enter after editing" );
                 }else{
-                    String request = "POST " + record.split(" ")[0] + " " + newRecord[1];
-                    String updatedRecord = row + " " + newRecord[1];
-                    updateList.addFirst(updatedRecord);
-                    new Thread(new Runnable() {
+                    if(connected){
+                        String request = "POST " + record.split(" ")[0] + " " + newRecord[1];
+                        String updatedRecord = row + " " + newRecord[1];
+                        updateList.addFirst(updatedRecord);
+                        new Thread(new Runnable() {
                         @Override
                         public void run(){
                             handler.serverCall(request);
                         }
-                    }).start(); 
+                        }).start(); 
+                    }else{
+                        pPage.textField.setText("You are not connected to the server!");
+                    }
+                    
                 }
                 pPage.updtBtn.setSelected(false);
             }
         });
-        
-        
-        
+
     }
+    
+    private String addRecord(){
+        return "";
+    }
+    
     
     private String[] getEditedRecord(int row){
         
