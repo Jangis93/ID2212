@@ -120,12 +120,10 @@ public class ConnectionHandler extends Thread implements Serializable {
            statement.executeUpdate(query);
            statement.close();
         }catch(SQLException s){
-            System.out.println("Could not remove record");
             out.write(NOT_FOUND);
             out.write("\n");
             out.flush();
         }
-        System.out.println("removed record");
         out.write(NO_CONTENT);
         out.write("\n");
         out.flush();
@@ -134,7 +132,6 @@ public class ConnectionHandler extends Thread implements Serializable {
     private void updateRequest(String input){
         String[] tokens = input.split(" ");
         String oldID = tokens[1];
-        System.out.println("tokens: " + Arrays.toString(tokens));
         String sport = "";
         
         String query = "UPDATE PARTICIPANTS SET ID = ?, NAME = ?, GENDER=?, BIRTHDAY=?, HEIGHT=?, WEIGHT=?, SPORT=?, COUNTRY=? " + 
