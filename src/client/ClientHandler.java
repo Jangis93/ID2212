@@ -65,6 +65,7 @@ public class ClientHandler extends Thread{
         String total = "";
         while(running){
             System.out.println("reading");
+            total = "";
             try{
                 if((answer = in.readLine()) != null){
                     if(answer.equals("HTTP/1.0 200 OK")){
@@ -75,7 +76,7 @@ public class ClientHandler extends Thread{
                                     break;
                                 }else{
                                     total += answer + "\n";
-                                }       
+                                }
                             }
                             String t = total;
                             new Thread(new Runnable() {

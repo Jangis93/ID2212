@@ -18,7 +18,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Arrays;
+import static server.ConnectionHandler.UNAVAILABLE;
 
 /**
  *
@@ -59,6 +61,15 @@ public class Server {
         }catch(Exception e){
             e.printStackTrace();
         }
+    }
+    
+    public Connection getConnection(){
+        try{
+            return DriverManager.getConnection(JDBC_DRIVER, "michaela", "michaela");
+        }catch(SQLException s){
+            s.printStackTrace();            
+        }
+        return null;
     }
     
     private void listen(){
@@ -150,4 +161,5 @@ public class Server {
         }
         return false;
     }
+    
 }
