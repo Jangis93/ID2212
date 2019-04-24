@@ -31,17 +31,21 @@ public class ConnectionHandler extends Thread implements Serializable {
     private Connection connection;
     private BufferedReader in;
     private PrintWriter out;
+    private final int ID;
     static final String OK = "HTTP/1.0 200 OK";
     static final String NO_CONTENT = "HTTP/1.0 204 NO CONTENT";
     static final String CREATED = "HTTP/1.0 201 CREATED";
     static final String UNPROCESSABLE = "HTTP/1.0 422 UNPROCESSABLE ENTITY";
     static final String NOT_FOUND = "HTTP/1.0 404 NOT FOUND";
     static final String UNAVAILABLE = "HTTP/1.0 503 SERVICE UNAVAILABLE";
+    static final String UPDATE = "HTTP/1.0 UPDATE";
     
-    public ConnectionHandler(Server server, Socket client, Connection connection){
+    
+    public ConnectionHandler(Server server, Socket client, Connection connection, int ID){
         this.connectionPoint = server;
         this.client = client;
         this.connection = connection;
+        this.ID = ID;
     }
     
     public void run(){
@@ -52,7 +56,7 @@ public class ConnectionHandler extends Thread implements Serializable {
             
             while(true){
                 str = in.readLine();
-                System.out.println(str);
+                System.out.println(ID + " " + str);
                 if(str.equals("GET")){
                     out.write(OK);
                     out.write("\n");
@@ -60,7 +64,6 @@ public class ConnectionHandler extends Thread implements Serializable {
                     if((str = in.readLine()).equals("HTTP/1.0 100 CONTINUE")){
                         System.out.println(str);
                         getRequest();
-                        //checkDB();
                     }
                 }else if(str.split(" ")[0].equals("DELETE")){
                     String record = str.split(" ")[1];
@@ -70,7 +73,7 @@ public class ConnectionHandler extends Thread implements Serializable {
                     if((str = in.readLine()).equals("HTTP/1.0 100 CONTINUE")){
                         System.out.println(record);
                         deleteRequest(record);
-                        checkDB();
+                        connectionPoint.notifyUpdate(ID, "DELETE", record, record);
                     }
                 }else if(str.split(" ")[0].equals("POST")){
                     String record = str;
@@ -89,29 +92,42 @@ public class ConnectionHandler extends Thread implements Serializable {
                 
     }
     
+    public void notify(String request, String oldRecord, String newRecord){
+        System.out.println(ID + " Notifying!");
+        out.write(UPDATE);
+        out.write("\n");
+        out.flush();
+        out.write(request);
+        out.write("\n");
+        out.flush();
+        out.write(oldRecord);
+        out.write("\n");
+        out.flush();
+        out.write(newRecord);
+        out.write("\n");
+        out.flush();
+        out.write("\n");
+        out.flush();
+    }
+    
     /*
     Sends all information that exists in database to client
     */
     private void getRequest(){
         String query = "SELECT * FROM PARTICIPANTS";
         try{
-            //Connection connection = connectionPoint.getConnection();
             Statement statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery(query);
             String result = "";
             while(resultSet.next()){
                 result = resultSet.getInt("ID") + " " + resultSet.getString("NAME") + " " + resultSet.getString("GENDER") + " " + resultSet.getString("BIRTHDAY") + " "
                             + resultSet.getFloat("HEIGHT") + " " + resultSet.getFloat("WEIGHT") + " " + resultSet.getString("COUNTRY") + " " + resultSet.getString("SPORT");
-                System.err.println(result);
                 out.write(result);
                 out.write("\n");
                 out.flush();
             }
-            System.err.println("---------------------");
             out.write("\n");
             out.flush();
-            statement.close();
-            //connection.close();
         }catch(SQLException e){
             e.printStackTrace();
             out.write(UNAVAILABLE);
@@ -126,12 +142,10 @@ public class ConnectionHandler extends Thread implements Serializable {
         String ID = record;
         String query = "DELETE FROM PARTICIPANTS WHERE ID=" + ID;
         try{
-           //Connection connection = connectionPoint.getConnection();
            Statement statement = connection.createStatement();
            statement.executeUpdate(query);
            connection.commit();
            statement.close();
-           //connection.close();
         }catch(SQLException s){
             out.write(NOT_FOUND);
             out.write("\n");
@@ -152,12 +166,7 @@ public class ConnectionHandler extends Thread implements Serializable {
             while(resultSet.next()){
                 result = resultSet.getInt("ID") + " " + resultSet.getString("NAME") + " " + resultSet.getString("GENDER") + " " + resultSet.getString("BIRTHDAY") + " "
                             + resultSet.getFloat("HEIGHT") + " " + resultSet.getFloat("WEIGHT") + " " + resultSet.getString("COUNTRY") + " " + resultSet.getString("SPORT");
-                System.err.println(result);
             }
-            System.err.println();
-            System.err.println();
-            System.err.println();
-
             statement.close();
         }catch(SQLException e){
             e.printStackTrace();         
@@ -172,8 +181,7 @@ public class ConnectionHandler extends Thread implements Serializable {
         String query = "UPDATE PARTICIPANTS SET ID = ?, NAME = ?, GENDER=?, BIRTHDAY=?, HEIGHT=?, WEIGHT=?, SPORT=?, COUNTRY=? " + 
                             "WHERE ID = " + oldID;
         
-        try{
-            //Connection connection = connectionPoint.getConnection();           
+        try{          
             PreparedStatement pState = connection.prepareStatement(query); 
             pState.setInt(1, Integer.parseInt(tokens[2]));
             pState.setString(2, tokens[3] + " " + tokens[4]);

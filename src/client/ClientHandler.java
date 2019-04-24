@@ -110,10 +110,32 @@ public class ClientHandler extends Thread{
                             }
                         }
                     }else{
+                        System.err.println(answer);
+                        while((answer = in.readLine()) != null){
+                            if(answer.isEmpty()){
+                                    break;
+                            }else{
+                                total += answer + "\n";
+                                System.err.println(total);
+                            }   
+                        }
+                        String t = total;
+                        String r = "UPDATE";
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run(){
+                                gui.serverResponse(r, t);
+                            }
+                        }).start();
+                    }
+                    /*
+                    else{
+                        System.err.println("closing socket");
                         in.close();
                         out.close();
                         socket.close();
                     }
+                    */
                 }
             }catch(IOException e){
                 

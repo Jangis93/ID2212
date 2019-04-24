@@ -33,6 +33,7 @@ public class Server {
     
     static final String JDBC_DRIVER = "jdbc:derby://localhost:1527/Members";
     static protected Connection connection;
+    private ArrayList<ConnectionHandler> handlers;
     
     public static void main(String[] args){
         Server server = new Server();
@@ -52,6 +53,7 @@ public class Server {
             Class.forName("org.apache.derby.jdbc.EmbeddedDriver");
             connection = DriverManager.getConnection(JDBC_DRIVER, "michaela", "michaela");
             socket = new ServerSocket(PORT, 0, InetAddress.getByName(null));
+            handlers = new ArrayList<>();
         }catch(IOException e){
             e.printStackTrace();
         }catch(ClassNotFoundException  ce){
@@ -63,21 +65,26 @@ public class Server {
         }
     }
     
-    public Connection getConnection(){
-        try{
-            return DriverManager.getConnection(JDBC_DRIVER, "michaela", "michaela");
-        }catch(SQLException s){
-            s.printStackTrace();            
-        }
-        return null;
+    
+    public void notifyUpdate(int ID, String request, String oldRecord, String newRecord){
+        
+        for(int i = 0; i < handlers.size(); i++){
+            if(i != ID){
+                ConnectionHandler h = handlers.get(i);
+                h.notify(request, oldRecord, newRecord);
+            } 
+        }  
     }
+    
+    
     
     private void listen(){
         
         while(true){
             try{
                 Socket client = socket.accept();
-                ConnectionHandler handler = new ConnectionHandler(this, client, connection);
+                ConnectionHandler handler = new ConnectionHandler(this, client, connection, handlers.size());
+                handlers.add(handler);
                 handler.start();
             }catch(IOException e){
                 e.printStackTrace();
@@ -99,9 +106,7 @@ public class Server {
         pState = connection.prepareStatement(query);
        
         while((dataRow = TSVFile.readLine()) != null){
-            //System.out.println(dataRow);
             String[] tokens = dataRow.split(" ");
-            //System.out.println(Arrays.toString(tokens));
             for(int i = 0; i < tokens.length; i++){
                 switch(i){
                     case 0: ID = Integer.parseInt(tokens[0]);

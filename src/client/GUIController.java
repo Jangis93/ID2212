@@ -77,7 +77,32 @@ public class GUIController extends Thread {
             model.insertRow(index, processData(updatedRecord));
             mPage.record_list.setModel(model);
             pPage.textField.setText("The record was succesfully updated!");
+        }else if(request.equals("UPDATE")){
+            String[] tokens = answer.split("\n");
+            if(tokens[0].equals("DELETE")){
+                int index = getRecord(tokens[1]);
+                String record = data.get(index);
+                DefaultTableModel model = (DefaultTableModel) mPage.record_list.getModel();
+                model.removeRow(index);
+                mPage.record_list.setModel(model);
+                mPage.msgField.setText("An update from the server has occured: " + "\n" + 
+                        "Deleted record: " + "\n" + record);
+            }else if(tokens[0].equals("UPDATE")){
+                
+            }            
         }
+    }
+    
+    private int getRecord(String ID){
+        
+        for(int i = 0; i < data.size(); i++){
+            System.out.println(data.get(i));
+            String[] tokens = data.get(i).split(" ");
+            if(tokens[0].equals(ID)){
+                return i;
+            }
+        }
+        return -1;
     }
     
     private void eventListener(){
