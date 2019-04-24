@@ -88,7 +88,15 @@ public class GUIController extends Thread {
                 mPage.msgField.setText("An update from the server has occured: " + "\n" + 
                         "Deleted record: " + "\n" + record);
             }else if(tokens[0].equals("UPDATE")){
-                
+                int index = getRecord(tokens[1].split(" ")[0]);
+                String record = data.get(index);
+                data.add(index, tokens[2]);
+                DefaultTableModel model = (DefaultTableModel) mPage.record_list.getModel();
+                model.removeRow(index);
+                model.insertRow(index, processData(tokens[2]));
+                mPage.record_list.setModel(model);
+                mPage.msgField.setText("An update from the server has occured: " + "\n" + 
+                        "Old record: " + "\n" + tokens[1] + "\n" + "Updated record: " + "\n" + tokens[2]);
             }            
         }
     }
@@ -306,12 +314,7 @@ public class GUIController extends Thread {
             }
         });
 
-    }
-    
-    private String addRecord(){
-        return "";
-    }
-    
+    }   
     
     private String[] getEditedRecord(int row){
         

@@ -82,7 +82,11 @@ public class ConnectionHandler extends Thread implements Serializable {
                     out.flush();
                     if((str = in.readLine()).equals("HTTP/1.0 100 CONTINUE")){
                         System.out.println(record);
+                        String[] tokens = record.split(" ");
+                        String oldRecord = getRecord(tokens[1]);
+                        String newRecord = record.substring(5+tokens[1].length()+1);
                         updateRequest(record);
+                        connectionPoint.notifyUpdate(ID, "UPDATE", oldRecord, newRecord);
                     }
                 }
             }
@@ -90,6 +94,22 @@ public class ConnectionHandler extends Thread implements Serializable {
             e.printStackTrace();
         }
                 
+    }
+    
+    private String getRecord(String ID){
+        String query = "SELECT * FROM PARTICIPANTS WHERE ID=" + ID;
+        String result = "";
+        try{
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery(query);
+            if(resultSet.next()){
+                result = resultSet.getInt("ID") + " " + resultSet.getString("NAME") + " " + resultSet.getString("GENDER") + " " + resultSet.getString("BIRTHDAY") + " "
+                            + resultSet.getFloat("HEIGHT") + " " + resultSet.getFloat("WEIGHT") + " " + resultSet.getString("COUNTRY") + " " + resultSet.getString("SPORT");
+            }
+        }catch(SQLException e){
+            e.printStackTrace();       
+        }
+        return result;
     }
     
     public void notify(String request, String oldRecord, String newRecord){
@@ -155,22 +175,6 @@ public class ConnectionHandler extends Thread implements Serializable {
         out.write("\n");
         out.flush();
         
-    }
-    
-    private void checkDB(){
-        String query = "SELECT * FROM PARTICIPANTS";
-        try{
-            Statement statement = connectionPoint.connection.createStatement(); //connection.createStatement();
-            ResultSet resultSet = statement.executeQuery(query);
-            String result = "";
-            while(resultSet.next()){
-                result = resultSet.getInt("ID") + " " + resultSet.getString("NAME") + " " + resultSet.getString("GENDER") + " " + resultSet.getString("BIRTHDAY") + " "
-                            + resultSet.getFloat("HEIGHT") + " " + resultSet.getFloat("WEIGHT") + " " + resultSet.getString("COUNTRY") + " " + resultSet.getString("SPORT");
-            }
-            statement.close();
-        }catch(SQLException e){
-            e.printStackTrace();         
-        }
     }
     
     private void updateRequest(String input){

@@ -116,7 +116,7 @@ public class ClientHandler extends Thread{
                                     break;
                             }else{
                                 total += answer + "\n";
-                                System.err.println(total);
+                                //System.err.println(total);
                             }   
                         }
                         String t = total;
