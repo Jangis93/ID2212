@@ -29,13 +29,14 @@ public class MainPage extends javax.swing.JPanel {
 
         jScrollPane1 = new javax.swing.JScrollPane();
         record_list = new javax.swing.JTable();
-        msgField = new javax.swing.JTextField();
         jPanel1 = new javax.swing.JPanel();
         statsBtn = new javax.swing.JToggleButton();
         cntBtn = new javax.swing.JToggleButton();
         discBtn = new javax.swing.JToggleButton();
         jLabel1 = new javax.swing.JLabel();
         addBtn = new javax.swing.JToggleButton();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        msgField = new javax.swing.JTextArea();
 
         record_list.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -111,6 +112,10 @@ public class MainPage extends javax.swing.JPanel {
                 .addGap(26, 26, 26))
         );
 
+        msgField.setColumns(20);
+        msgField.setRows(5);
+        jScrollPane2.setViewportView(msgField);
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -120,10 +125,10 @@ public class MainPage extends javax.swing.JPanel {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 672, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addContainerGap(30, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(msgField, javax.swing.GroupLayout.PREFERRED_SIZE, 270, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 63, Short.MAX_VALUE)
+                        .addComponent(jScrollPane2)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(49, 49, 49))))
         );
@@ -132,13 +137,10 @@ public class MainPage extends javax.swing.JPanel {
             .addGroup(layout.createSequentialGroup()
                 .addGap(23, 23, 23)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 275, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(28, 28, 28)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(51, 51, 51)
-                        .addComponent(msgField, javax.swing.GroupLayout.PREFERRED_SIZE, 86, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(28, 28, 28)
-                        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 211, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(15, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
@@ -155,7 +157,8 @@ public class MainPage extends javax.swing.JPanel {
     private javax.swing.JLabel jLabel1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
-    public javax.swing.JTextField msgField;
+    private javax.swing.JScrollPane jScrollPane2;
+    public javax.swing.JTextArea msgField;
     public javax.swing.JTable record_list;
     public javax.swing.JToggleButton statsBtn;
     // End of variables declaration//GEN-END:variables
