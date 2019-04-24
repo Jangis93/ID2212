@@ -56,37 +56,46 @@ public class ConnectionHandler extends Thread implements Serializable {
             
             while(true){
                 str = in.readLine();
+                StringTokenizer st = new StringTokenizer(str);
+                String method = st.nextToken();
+                String resource = st.nextToken();
                 System.out.println(ID + " " + str);
-                if(str.equals("GET")){
+                if(method.equals("GET")){
                     out.write(OK);
                     out.write("\n");
                     out.flush();
                     if((str = in.readLine()).equals("HTTP/1.0 100 CONTINUE")){
-                        System.out.println(str);
-                        getRequest();
+                        if(resource.equals("RECORDS")){
+                            getRequest();
+                        }else if(resource.equals("STATS")){
+                            getStats();
+                        }
                     }
-                }else if(str.split(" ")[0].equals("DELETE")){
-                    String record = str.split(" ")[1];
+                }else if(method.equals("DELETE")){
+                    String record = resource;
                     out.write(OK);
                     out.write("\n");
                     out.flush();
                     if((str = in.readLine()).equals("HTTP/1.0 100 CONTINUE")){
-                        System.out.println(record);
+                        //System.out.println(record);
+                        String oldRecord = getRecord(record);
                         deleteRequest(record);
                         connectionPoint.notifyUpdate(ID, "DELETE", record, record);
+                        //connectionPoint.updateStats(record, oldRecord, "");
                     }
-                }else if(str.split(" ")[0].equals("POST")){
+                }else if(method.equals("POST")){
                     String record = str;
                     out.write(OK);
                     out.write("\n");
                     out.flush();
                     if((str = in.readLine()).equals("HTTP/1.0 100 CONTINUE")){
-                        System.out.println(record);
+                        //System.out.println(record);
                         String[] tokens = record.split(" ");
                         String oldRecord = getRecord(tokens[1]);
                         String newRecord = record.substring(5+tokens[1].length()+1);
                         updateRequest(record);
                         connectionPoint.notifyUpdate(ID, "UPDATE", oldRecord, newRecord);
+                        //connectionPoint.updateStats(record, oldRecord, newRecord);
                     }
                 }
             }
@@ -113,7 +122,7 @@ public class ConnectionHandler extends Thread implements Serializable {
     }
     
     public void notify(String request, String oldRecord, String newRecord){
-        System.out.println(ID + " Notifying!");
+        //System.out.println(ID + " Notifying!");
         out.write(UPDATE);
         out.write("\n");
         out.flush();
@@ -128,6 +137,10 @@ public class ConnectionHandler extends Thread implements Serializable {
         out.flush();
         out.write("\n");
         out.flush();
+    }
+    
+    private void getStats(){
+        
     }
     
     /*

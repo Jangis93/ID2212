@@ -34,6 +34,7 @@ public class Server {
     static final String JDBC_DRIVER = "jdbc:derby://localhost:1527/Members";
     static protected Connection connection;
     private ArrayList<ConnectionHandler> handlers;
+    private Statistics stats;
     
     public static void main(String[] args){
         Server server = new Server();
@@ -54,6 +55,7 @@ public class Server {
             connection = DriverManager.getConnection(JDBC_DRIVER, "michaela", "michaela");
             socket = new ServerSocket(PORT, 0, InetAddress.getByName(null));
             handlers = new ArrayList<>();
+            stats = new Statistics();
         }catch(IOException e){
             e.printStackTrace();
         }catch(ClassNotFoundException  ce){
@@ -74,6 +76,14 @@ public class Server {
                 h.notify(request, oldRecord, newRecord);
             } 
         }  
+    }
+    
+    public synchronized void updateStats(String request, String oldRecord, String newRecord){
+        
+        if(request.equals("DELETE")){
+            String[] tokens = oldRecord.split(" ");
+            
+        }
     }
     
     
@@ -145,6 +155,7 @@ public class Server {
                     
         }
         pState.close();
+        stats.addParticipant(gender, height, weight, sport, country);
     }
         
     private boolean isEmpty(){

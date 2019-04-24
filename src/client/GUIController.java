@@ -82,6 +82,7 @@ public class GUIController extends Thread {
             if(tokens[0].equals("DELETE")){
                 int index = getRecord(tokens[1]);
                 String record = data.get(index);
+                data.remove(index);
                 DefaultTableModel model = (DefaultTableModel) mPage.record_list.getModel();
                 model.removeRow(index);
                 mPage.record_list.setModel(model);
@@ -139,7 +140,7 @@ public class GUIController extends Thread {
                          es.printStackTrace();
                     }
                 }else{
-                    String request = "GET";
+                    String request = "GET RECORDS";
                     if(connected){
                         new Thread(new Runnable() {
                         @Override
@@ -204,6 +205,27 @@ public class GUIController extends Thread {
                     pPage.setRow(row);
                     pPage.recordTable.setModel(recordTable);
                 }
+            }
+        });
+        
+        mPage.statsBtn.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e){
+                int[] frameSize = new int[]{750, 700};
+                startNewFrame(sPage, "Statistics", frameSize);
+                String request = "GET";
+                if(connected){
+                    new Thread(new Runnable() {
+                    @Override
+                    public void run(){
+                        handler.serverCall(request);
+                    }
+                    }).start();
+                }else{
+                    mPage.msgField.setText("You are not connected to the server!");
+                }
+                
+                mPage.cntBtn.setSelected(false);
             }
         });
         
@@ -313,6 +335,8 @@ public class GUIController extends Thread {
                 pPage.updtBtn.setSelected(false);
             }
         });
+        
+        
 
     }   
     
