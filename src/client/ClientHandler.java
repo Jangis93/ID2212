@@ -70,7 +70,7 @@ public class ClientHandler extends Thread{
                 if((answer = in.readLine()) != null){
                     if(answer.equals("HTTP/1.0 200 OK")){
                         writeSocket("HTTP/1.0 100 CONTINUE");
-                        if(requestQueue.getLast().equals("GET")){
+                        if(requestQueue.getLast().equals("GET RECORDS") | requestQueue.getLast().equals("GET STATS")){
                             while((answer = in.readLine()) != null){
                                 if(answer.isEmpty()){
                                     break;
@@ -146,11 +146,17 @@ public class ClientHandler extends Thread{
     /*
     Method for GUI controller to call when needing to do invoke server communication
     */
-    public void serverCall(String request){
-        requestQueue.addFirst(request.split(" ")[0]);
-        out.write(request);
-        out.write("\n");
-        out.flush();
+    public void serverCall(String request, String payLoad){
+        requestQueue.addFirst(request);
+        if(request.split(" ")[0].equals("GET")){
+            out.write(request);
+            out.write("\n");
+            out.flush();
+        }else{
+            out.write(request + " " + payLoad);
+            out.write("\n");
+            out.flush();
+        }
     }
     
     private void writeSocket(String request){

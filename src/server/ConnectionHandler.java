@@ -81,7 +81,7 @@ public class ConnectionHandler extends Thread implements Serializable {
                         String oldRecord = getRecord(record);
                         deleteRequest(record);
                         connectionPoint.notifyUpdate(ID, "DELETE", record, record);
-                        //connectionPoint.updateStats(record, oldRecord, "");
+                        connectionPoint.handleStats("DELETE", oldRecord, "");
                     }
                 }else if(method.equals("POST")){
                     String record = str;
@@ -140,7 +140,16 @@ public class ConnectionHandler extends Thread implements Serializable {
     }
     
     private void getStats(){
+        String stats = connectionPoint.handleStats("", "", "");
         
+        String[] tokens = stats.split(" ");
+        for(int i = 0; i < tokens.length; i++){
+            out.write(tokens[i]);
+            out.write("\n");
+            out.flush();
+        }
+        out.write("\n");
+        out.flush();
     }
     
     /*

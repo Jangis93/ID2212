@@ -57,8 +57,10 @@ public class GUIController extends Thread {
     
     
     public void serverResponse(String request, String answer){
-        if(request.equals("GET")){
+        if(request.equals("GET RECORDS")){
             fillRecords(answer);
+        }else if(request.equals("GET STATS")){
+            setStats(answer);
         }else if(request.equals("DELETE")){
             int index = Integer.parseInt(updateList.pollLast().split(" ")[0]); 
             data.remove(index);
@@ -145,7 +147,7 @@ public class GUIController extends Thread {
                         new Thread(new Runnable() {
                         @Override
                         public void run(){
-                            handler.serverCall(request);
+                            handler.serverCall(request, "");
                         }
                         }).start();
                     }else{
@@ -213,19 +215,19 @@ public class GUIController extends Thread {
             public void actionPerformed(ActionEvent e){
                 int[] frameSize = new int[]{750, 700};
                 startNewFrame(sPage, "Statistics", frameSize);
-                String request = "GET";
+                String request = "GET STATS";
                 if(connected){
                     new Thread(new Runnable() {
                     @Override
                     public void run(){
-                        handler.serverCall(request);
+                        handler.serverCall(request, "");
                     }
                     }).start();
                 }else{
-                    mPage.msgField.setText("You are not connected to the server!");
+                    mPage.msgField.setText("You could not retrieve the statistics!");
                 }
                 
-                mPage.cntBtn.setSelected(false);
+                mPage.statsBtn.setSelected(false);
             }
         });
         
@@ -288,11 +290,12 @@ public class GUIController extends Thread {
 
                     // setup the server connection in the communication thread
                     String recordID = data.get(row).split(" ")[0];
-                    String request = "DELETE " + recordID;
+                    String request = "DELETE";
+                    String payLoad = recordID;
                     new Thread(new Runnable() {
                     @Override
                     public void run(){
-                        handler.serverCall(request);
+                        handler.serverCall(request, payLoad);
                     }
                     }).start();
                 }else{
@@ -318,13 +321,14 @@ public class GUIController extends Thread {
                     pPage.textField.setText("You have not updated the record." + "\n" + "Don't forget to press enter after editing" );
                 }else{
                     if(connected){
-                        String request = "POST " + record.split(" ")[0] + " " + newRecord[1];
+                        String request = "POST";
+                        String payLoad = record.split(" ")[0] + " " + newRecord[1];
                         String updatedRecord = row + " " + newRecord[1];
                         updateList.addFirst(updatedRecord);
                         new Thread(new Runnable() {
                         @Override
                         public void run(){
-                            handler.serverCall(request);
+                            handler.serverCall(request, payLoad);
                         }
                         }).start(); 
                     }else{
@@ -335,10 +339,69 @@ public class GUIController extends Thread {
                 pPage.updtBtn.setSelected(false);
             }
         });
-        
-        
-
     }   
+    
+    private void setStats(String stats){
+        String[] tokens = stats.split("\n");
+        
+        Float avHeight = Float.parseFloat(tokens[5]) / Integer.parseInt(tokens[0]);
+        Float avWeight = Float.parseFloat(tokens[6]) / Integer.parseInt(tokens[0]);
+        
+        sPage.partField.setText(tokens[0]);
+        sPage.countryField.setText(tokens[1]);
+        sPage.sportsField.setText(tokens[2]);
+        sPage.menField.setText(tokens[3]);
+        sPage.womenField.setText(tokens[4]);
+        sPage.heightField.setText(String.valueOf(avHeight));
+        sPage.weightField.setText(String.valueOf(avWeight));
+        
+        DefaultTableModel countryTable = new DefaultTableModel(){
+            @Override
+            public boolean isCellEditable(int row, int column){
+                return false;
+            }
+        };
+        countryTable.addColumn("COUNTRY");
+        countryTable.addColumn("ATHLETES");
+
+        int j = 0;
+        for(int i = 7; i < 7 + 2 * Integer.parseInt(tokens[1]); i += 2){
+            
+            Object[] row = {tokens[i], tokens[i+1]};
+
+            countryTable.insertRow(j, row);
+            j++;
+        }
+        sPage.countryTable.setModel(countryTable);
+        
+        DefaultTableModel sportTable = new DefaultTableModel(){
+            @Override
+            public boolean isCellEditable(int row, int column){
+                return false;
+            }
+        };
+        sportTable.addColumn("SPORT");
+        sportTable.addColumn("PRACTIONERS");
+        int num;
+        String sport;
+        j = 0;
+        for(int i = 7+2*Integer.parseInt(tokens[1]); i < 7+2*Integer.parseInt(tokens[1])+ 2*Integer.parseInt(tokens[2]) +1; i += 2){
+            try{
+                num = Integer.parseInt(tokens[i+1]);
+                sport = tokens[i];
+            }catch(NumberFormatException e){
+                sport = tokens[i] + " " + tokens[i+1];
+                i++;
+                num = Integer.parseInt(tokens[i+1]);
+            }
+            Object[] row = {sport, num};
+            System.out.println(sport + " " + num);
+
+            sportTable.insertRow(j, row);
+            j++;
+        }
+        sPage.sportTable.setModel(sportTable);
+    }
     
     private String[] getEditedRecord(int row){
         

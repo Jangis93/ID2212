@@ -6,6 +6,7 @@
 package server;
 
 import java.util.ArrayList;
+import java.util.Hashtable;
 
 /**
  *
@@ -19,8 +20,8 @@ public class Statistics {
     private int numberOfMen;
     private float totalWeight;
     private float totalHeight;
-    private ArrayList<Country> countryStats;
-    private ArrayList<Sport> sportStats;
+    private Hashtable<String,Integer> countries;
+    private Hashtable<String,Integer> sports;
     
     public Statistics(){
         this.numberOfCountries = 0;
@@ -28,8 +29,8 @@ public class Statistics {
         this.numberOfParticipants = 0;
         this.totalHeight = 0;
         this.totalWeight = 0;
-        this.countryStats = new ArrayList();
-        this.sportStats = new ArrayList();
+        countries = new Hashtable<String, Integer>();
+        sports = new Hashtable<String, Integer>();
     }
     
     public void addParticipant(String gender, float height, float weight, String sport, String country){
@@ -43,34 +44,18 @@ public class Statistics {
             this.numberOfMen += 1;
         }
         
-        boolean countryFound = false;
-        for(int i = 0; i < countryStats.size(); i++){
-            if(countryStats.get(i).getName().equals(country)){
-                Country c = countryStats.get(i);
-                c.addMember();
-                countryStats.set(i, c);
-                countryFound = true;
-                break;
-            }
-        }
-        if(!countryFound){
-            Country newCountry = new Country(country);
-            countryStats.add(newCountry);
+        
+        if(countries.containsKey(country)){
+            countries.put(country, countries.get(country)+1);
+        }else{
+            countries.put(country, 1);
             this.numberOfCountries += 1;
         }
         
-        boolean sportFound = false;
-        for(int i = 0; i < sportStats.size(); i++){
-            if(sportStats.get(i).getName().equals(sport)){
-                Sport s = sportStats.get(i);
-                s.addParticipant();
-                sportStats.set(i, s);
-                break;
-            }
-        }
-        if(!sportFound){
-            Sport newSport = new Sport(sport);
-            sportStats.add(newSport);
+        if(sports.containsKey(sport)){
+            sports.put(sport, sports.get(sport)+1);
+        }else{
+            sports.put(sport, 1);
             this.numberOfSports += 1;
         }
     }
@@ -103,6 +88,15 @@ public class Statistics {
         return this.numberOfParticipants;
     }
     
+    
+    public Hashtable<String, Integer> getCountriesStats(){
+        return this.countries;
+    }
+    
+    public Hashtable<String, Integer> getSportsStats(){
+        return this.sports;
+    }
+    
     public void setHeight(float height){
         this.totalHeight = height;
     }
@@ -119,36 +113,31 @@ public class Statistics {
         this.numberOfWomen = women;
     }
     
+    public void setParticipants(int people){
+        this.numberOfParticipants = people;
+    }
+    
     public void updateSport(String sport, int option){
         
-        for(int i = 0; i < sportStats.size(); i++){
-            if(sportStats.get(i).getName().equals(sport)){
-                Sport s = sportStats.get(i);
-                if(option == 0){
-                    s.deleteParticipant();
-                }else if(option == 1){
-                    s.addParticipant();
-                }
-                sportStats.set(i, s);
-                break;
-            }
+        if(option == 0){
+            // delete
+            this.sports.put(sport, sports.get(sport)-1);
+        }else{
+            // add
+            this.sports.put(sport, sports.get(sport)+1);
+        }
+    }
+    public void updateCountry(String country, int option){
+        
+        if(option == 0){
+            // delete
+            this.countries.put(country, countries.get(country)-1);
+        }else{
+            // add
+            this.countries.put(country, countries.get(country)+1);
         }
     }
     
-    public void updtateCountry(String country, int option){
-        
-        for(int i = 0; i < countryStats.size(); i++){
-            if(countryStats.get(i).getName().equals(country)){
-                Country s = countryStats.get(i);
-                if(option == 0){
-                    s.deleteMember();
-                }else if(option == 1){
-                    s.addMember();
-                }
-                countryStats.set(i, s);
-                break;
-            }
-        }
-    }
+   
 
 }

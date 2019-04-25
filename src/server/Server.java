@@ -20,6 +20,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Hashtable;
 import static server.ConnectionHandler.UNAVAILABLE;
 
 /**
@@ -44,6 +45,8 @@ public class Server {
             }catch(Exception e){
                 e.printStackTrace();
             }
+        }else{
+            server.setUpStats();
         }
         server.listen();
     }
@@ -67,7 +70,6 @@ public class Server {
         }
     }
     
-    
     public void notifyUpdate(int ID, String request, String oldRecord, String newRecord){
         
         for(int i = 0; i < handlers.size(); i++){
@@ -78,12 +80,45 @@ public class Server {
         }  
     }
     
-    public synchronized void updateStats(String request, String oldRecord, String newRecord){
+    public synchronized String handleStats(String request, String oldRecord, String newRecord){
+        String result = "";
         
+        Hashtable<String, Integer> countries = stats.getCountriesStats();
+        Hashtable<String, Integer> sports = stats.getSportsStats();
+        System.out.println(oldRecord);
         if(request.equals("DELETE")){
             String[] tokens = oldRecord.split(" ");
+            if(tokens[3].equals("F")){
+                stats.setWomen(stats.getCountWomen() - 1);
+            }else{
+                stats.setMen(stats.getCountMen() - 1);
+            }
             
+            stats.setParticipants(stats.getCountParticipants() - 1);
+            stats.setHeight(stats.getHeight() - Float.parseFloat(tokens[5]));
+            stats.setWeight(stats.getWeight() - Float.parseFloat(tokens[6]));
+            
+            stats.updateCountry(tokens[7], 0);
+            if(tokens.length > 9){
+                stats.updateSport(tokens[8] + " " + tokens[9], 0);
+            }else{
+                stats.updateSport(tokens[8], 0);
+            }            
+            return result;
         }
+            
+        result = stats.getCountParticipants() + " " + stats.getCountCountries() + " " +  stats.getCountSports() + 
+                " " + stats.getCountMen() + " " + stats.getCountWomen() + " " + stats.getHeight() + " " + stats.getWeight();
+        
+        for(String key : countries.keySet()){
+            result += " " + key + " " + countries.get(key);
+        }
+        
+        for(String key : sports.keySet()){
+            result += " " + key + " " + sports.get(key);
+        }
+        
+        return result;
     }
     
     
@@ -98,6 +133,28 @@ public class Server {
             }catch(IOException e){
                 e.printStackTrace();
             }
+        }
+    }
+    
+    private void setUpStats(){
+        String query = "SELECT * FROM PARTICIPANTS";
+        float height = 0f, weight = 0f;
+        String country = " ", sport = " ", gender = " ";
+        try{
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery(query);
+            String result = "";
+            while(resultSet.next()){
+                gender = resultSet.getString("GENDER");
+                height = resultSet.getFloat("HEIGHT");
+                weight = resultSet.getFloat("WEIGHT");
+                country = resultSet.getString("COUNTRY"); 
+                sport = resultSet.getString("SPORT");
+                stats.addParticipant(gender, height, weight, sport, country);
+            }
+
+        }catch(SQLException e){
+            e.printStackTrace();           
         }
     }
     
@@ -152,10 +209,11 @@ public class Server {
             pState.setString(7, sport);
             pState.setString(8, country);
             pState.executeUpdate();
+            stats.addParticipant(gender, height, weight, sport, country);
                     
         }
         pState.close();
-        stats.addParticipant(gender, height, weight, sport, country);
+        
     }
         
     private boolean isEmpty(){
