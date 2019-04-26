@@ -97,9 +97,8 @@ public class ConnectionHandler extends Thread implements Serializable {
                         if(resource.equals("ADD")){
                             String newRecord = record.substring(9);
                             addRecord(newRecord);
-                            System.out.println(newRecord);
+                            connectionPoint.notifyUpdate(ID, "ADD", "", newRecord);
                             newRecord = record.substring(9 + tokens[2].length() + 1);
-                            //connectionPoint.notifyUpdate(ID, "UPDATE ADD", newRecord, "");
                             connectionPoint.handleStats("ADD", "", newRecord); 
                         }else{
                             String oldRecord = getRecord(tokens[1]);
@@ -204,12 +203,18 @@ public class ConnectionHandler extends Thread implements Serializable {
         out.write(request);
         out.write("\n");
         out.flush();
-        out.write(oldRecord);
-        out.write("\n");
-        out.flush();
-        out.write(newRecord);
-        out.write("\n");
-        out.flush();
+        if(!request.equals("ADD")){
+            out.write(oldRecord);
+            out.write("\n");
+            out.flush();
+            out.write(newRecord);
+            out.write("\n");
+            out.flush();
+        }else{
+            out.write(newRecord);
+            out.write("\n");
+            out.flush();
+        }
         out.write("\n");
         out.flush();
     }
