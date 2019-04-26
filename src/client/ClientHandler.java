@@ -109,7 +109,7 @@ public class ClientHandler extends Thread{
                                 }).start();
                             }
                         }
-                    }else{
+                    }else if(answer.equals("HTTP/1.0 UPDATE")){
                         System.err.println(answer);
                         while((answer = in.readLine()) != null){
                             if(answer.isEmpty()){

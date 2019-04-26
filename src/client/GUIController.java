@@ -83,12 +83,12 @@ public class GUIController extends Thread {
             pPage.textField.setText("The record was succesfully updated!");
         }else if(request.equals("POST ADD")){
             String newRecord = updateList.pollLast();
-            data.set(0, newRecord);
+            data.add(newRecord);
             
             DefaultTableModel model = (DefaultTableModel) mPage.record_list.getModel();
-            model.insertRow(0, processData(newRecord));
+            model.addRow(processData(newRecord));
             mPage.record_list.setModel(model);
-            mPage.msgField.setText("You have added a new record!");
+            mPage.msgField.setText("You have added a new record!" + "\n" + "Record:" + "\n" + newRecord);
         }else if(request.equals("UPDATE")){
             // notification from changes that other clients has done
             String[] tokens = answer.split("\n");
@@ -111,7 +111,16 @@ public class GUIController extends Thread {
                 mPage.record_list.setModel(model);
                 mPage.msgField.setText("An update from the server has occured: " + "\n" + 
                         "Old record: " + "\n" + tokens[1] + "\n" + "Updated record: " + "\n" + tokens[2]);
-            }       
+            }else if(tokens[0].equals("ADD")){
+                System.out.println(Arrays.toString(tokens));
+
+                data.add(tokens[1]);
+                DefaultTableModel model = (DefaultTableModel) mPage.record_list.getModel();
+                model.addRow(processData(tokens[1]));
+                mPage.record_list.setModel(model);
+                mPage.msgField.setText("An update from the server has occured: " + "\n" + "New record: " + "\n" + answer);
+
+            }      
             
         }
     }
