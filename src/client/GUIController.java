@@ -19,6 +19,8 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.table.DefaultTableModel;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 /**
  *
@@ -79,7 +81,16 @@ public class GUIController extends Thread {
             model.insertRow(index, processData(updatedRecord));
             mPage.record_list.setModel(model);
             pPage.textField.setText("The record was succesfully updated!");
+        }else if(request.equals("POST ADD")){
+            String newRecord = updateList.pollLast();
+            data.set(0, newRecord);
+            
+            DefaultTableModel model = (DefaultTableModel) mPage.record_list.getModel();
+            model.insertRow(0, processData(newRecord));
+            mPage.record_list.setModel(model);
+            mPage.msgField.setText("You have added a new record!");
         }else if(request.equals("UPDATE")){
+            // notification from changes that other clients has done
             String[] tokens = answer.split("\n");
             if(tokens[0].equals("DELETE")){
                 int index = getRecord(tokens[1]);
@@ -117,12 +128,93 @@ public class GUIController extends Thread {
         return -1;
     }
     
+    private int checkInputNewRecord(){
+        String errorMsg = "";
+        int error = 0;
+                
+        String pattern = "([a-zA-Z]+-?)*";
+        Pattern r = Pattern.compile(pattern);
+        String name = aPage.nameField.getText();
+        String surname = aPage.surnameField.getText();
+        Matcher m1 = r.matcher(name);
+        Matcher m2 = r.matcher(surname);
+
+        if(name.split(" ").length > 1 | surname.split(" ").length > 1){
+            error = 1;
+        }else if(!m1.matches() | !m2.matches()){
+            error = 2;
+        }
+
+        String height = aPage.heightField.getText();
+        String weight = aPage.weightField.getText();
+        try{
+            Float.parseFloat(height);
+            Float.parseFloat(weight);
+        }catch(NumberFormatException n){
+            error = 3;
+        }
+
+        String country = aPage.countryBox.getSelectedItem().toString();
+        String day = aPage.dayBox.getSelectedItem().toString();
+        String month = aPage.monthBox.getSelectedItem().toString();
+        String year = aPage.yearBox.getSelectedItem().toString();
+
+        if(day.equals("Day") | month.equals("Month") | year.equals("Year")){
+            error = 4;
+        }
+        
+        return error;
+    }
+    
     private void eventListener(){
+        
+        aPage.addBtn.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e){
+                String errorMsg = "";
+                String newRecord = "";
+                if(!connected){
+                    mPage.msgField.setText("You are not connected to the server!");
+                }else{
+                    int errorCode = checkInputNewRecord();
+                    if(errorCode == 0){
+                        errorMsg = "Everything looks good!";
+                        newRecord = aPage.IDfield.getText() + " " + aPage.nameField.getText() + " " + aPage.surnameField.getText() + 
+                                " " + aPage.genderBox.getSelectedItem().toString() + " " + 
+                                aPage.yearBox.getSelectedItem().toString()  + "/" + aPage.monthBox.getSelectedItem().toString() + "/" + aPage.dayBox.getSelectedItem().toString() + 
+                                " " + aPage.heightField.getText() + " " + aPage.weightField.getText() + " " + 
+                                aPage.countryBox.getSelectedItem().toString() + " " + aPage.sportBox.getSelectedItem().toString();
+                        System.out.println(newRecord);
+                        if(connected){
+                            String payLoad = newRecord;
+                            updateList.addFirst(payLoad);
+                            new Thread(new Runnable() {
+                            @Override
+                            public void run(){
+                                handler.serverCall("POST ADD", payLoad);
+                            }
+                            }).start();
+                        }else{
+                            mPage.msgField.setText("You are not connected to the server!");
+                        }
+                    }else if(errorCode == 1){
+                        errorMsg = "Please don't use spaces in the names. Add a - if there are several. ";
+                    }else if(errorCode == 2){
+                        errorMsg = "Illegal characters have been found in the name values. ";
+                    }else if(errorCode == 3){
+                        errorMsg = "You have wrongly given either the height or weight.";
+                    }else{
+                        errorMsg = "You have failed in providing a correct date. Please try again. ";
+                    }
+                    aPage.msgField.setText(errorMsg);
+                }
+            }
+        });
         
         mPage.addBtn.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e){
-                int[] frameSize = new int[]{750, 300};
+                int[] frameSize = new int[]{400, 500};
                 startNewFrame(aPage, "Add Participant", frameSize);
                 mPage.addBtn.setSelected(false);
             }
@@ -283,9 +375,13 @@ public class GUIController extends Thread {
                     updateList.addFirst(updateRequest);
 
                     // Adjust the GUI to visualize the deletion
+                    int newRow = row + 1;
+                    if(row == data.size()-1){
+                        newRow = row - 1;
+                    }
                     DefaultTableModel model = (DefaultTableModel) pPage.recordTable.getModel();
                     model.removeRow(0);
-                    Object[] ob = processData(data.get(row + 1));
+                    Object[] ob = processData(data.get(newRow));
                     model.insertRow(0, ob);
                     pPage.recordTable.setModel(model);
 
@@ -313,7 +409,6 @@ public class GUIController extends Thread {
                 int row = pPage.getRow();
                 String record = data.get(row);
                 String[] newRecord = getEditedRecord(row);
-                String n = newRecord[1];
                 
                 if(newRecord[0] == "false"){
                     pPage.textField.setText("Your input was not correct" + "\n" + "Remember height, weight, ID is numbers " + "\n" 
