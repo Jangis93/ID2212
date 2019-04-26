@@ -105,6 +105,84 @@ public class Server {
                 stats.updateSport(tokens[8], 0);
             }            
             return result;
+        }else if(request.equals("ADD")){
+            String[] tokens = newRecord.split(" ");
+            if(tokens[3].equals("F")){
+                stats.setWomen(stats.getCountWomen() + 1);
+            }else{
+                stats.setMen(stats.getCountMen() + 1);
+            }
+            
+            stats.setParticipants(stats.getCountParticipants() + 1);
+            stats.setHeight(stats.getHeight() + Float.parseFloat(tokens[4]));
+            stats.setWeight(stats.getWeight() + Float.parseFloat(tokens[5]));
+            
+            stats.updateCountry(tokens[6], 1);
+            if(tokens.length > 7){
+                stats.updateSport(tokens[7] + " " + tokens[8], 1);
+            }else{
+                stats.updateSport(tokens[7], 1);
+            }
+            return result;
+        }else if(request.equals("UPDATE")){
+            String[] tokensOld = oldRecord.split(" ");
+            String[] tokensNew = newRecord.split(" ");
+            
+            ArrayList<Integer> index = new ArrayList<Integer>();
+            index.add(3);
+            index.add(5);
+            index.add(6);
+            index.add(7);
+            index.add(8);
+            for(Integer i : index){
+                switch(i){
+                    case 3:
+                        if(!tokensOld[i].equals(tokensNew[i])){
+                            if(tokensOld[i].equals("M")){
+                                stats.setMen(stats.getCountMen() - 1);
+                                stats.setWomen(stats.getCountWomen() + 1);
+                            }else{
+                                stats.setMen(stats.getCountMen() + 1);
+                                stats.setWomen(stats.getCountWomen() - 1);
+                            }
+                        }
+                        break;
+                    case 5:
+                        if(!tokensOld[i].equals(tokensNew[i])){
+                            stats.setHeight(stats.getHeight() - Float.parseFloat(tokensOld[i]) + Float.parseFloat(tokensNew[i]));
+                        }
+                        break;
+                    case 6:
+                        if(!tokensOld[i].equals(tokensNew[i])){
+                            stats.setWeight(stats.getWeight() - Float.parseFloat(tokensOld[i]) + Float.parseFloat(tokensNew[i]));
+                        }
+                        break;
+                    case 7:
+                        if(!tokensOld[i].equals(tokensNew[i])){
+                            stats.updateCountry(tokensOld[i], 0);
+                            stats.updateCountry(tokensNew[i], 0);
+                        }
+                        break;
+                    case 8:
+                        if(tokensOld.length == tokensNew.length){
+                            if(tokensOld.length == 8){
+                                if(!tokensOld[i].equals(tokensNew[i])){
+                                    stats.updateSport(tokensOld[i], 0);
+                                    stats.updateSport(tokensNew[i], 1);
+                                }
+                            }else{
+                                String oldSport = tokensOld[i] + " " + tokensOld[i+1];
+                                String newSport = tokensNew[i] + " " + tokensNew[i+1];
+                                if(!oldSport.equals(newSport)){
+                                    stats.updateSport(oldSport, 0);
+                                    stats.updateSport(newSport, 1);
+                                }
+                            }
+                        }
+                        break;
+                }
+            }
+            return result;
         }
             
         result = stats.getCountParticipants() + " " + stats.getCountCountries() + " " +  stats.getCountSports() + 

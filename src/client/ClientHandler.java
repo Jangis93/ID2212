@@ -97,7 +97,7 @@ public class ClientHandler extends Thread{
                                 }
                                 }).start();
                             }  
-                        }else if(requestQueue.getLast().equals("POST")){
+                        }else if(requestQueue.getLast().equals("POST") | requestQueue.getLast().equals("POST ADD")){
                             if((answer = in.readLine()) != null & answer.equals("HTTP/1.0 201 CREATED")){
                                 new Thread(new Runnable() {
                                 @Override

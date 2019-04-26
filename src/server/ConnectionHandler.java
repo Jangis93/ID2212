@@ -20,6 +20,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.StringTokenizer;
+import static server.Server.connection;
 
 /**
  *
@@ -39,6 +40,7 @@ public class ConnectionHandler extends Thread implements Serializable {
     static final String NOT_FOUND = "HTTP/1.0 404 NOT FOUND";
     static final String UNAVAILABLE = "HTTP/1.0 503 SERVICE UNAVAILABLE";
     static final String UPDATE = "HTTP/1.0 UPDATE";
+    static final String SERVER_ERROR = "HTTP/1.0 500 Internal Server Error";
     
     
     public ConnectionHandler(Server server, Socket client, Connection connection, int ID){
@@ -60,6 +62,7 @@ public class ConnectionHandler extends Thread implements Serializable {
                 String method = st.nextToken();
                 String resource = st.nextToken();
                 System.out.println(ID + " " + str);
+                
                 if(method.equals("GET")){
                     out.write(OK);
                     out.write("\n");
@@ -91,11 +94,20 @@ public class ConnectionHandler extends Thread implements Serializable {
                     if((str = in.readLine()).equals("HTTP/1.0 100 CONTINUE")){
                         //System.out.println(record);
                         String[] tokens = record.split(" ");
-                        String oldRecord = getRecord(tokens[1]);
-                        String newRecord = record.substring(5+tokens[1].length()+1);
-                        updateRequest(record);
-                        connectionPoint.notifyUpdate(ID, "UPDATE", oldRecord, newRecord);
-                        //connectionPoint.updateStats(record, oldRecord, newRecord);
+                        if(resource.equals("ADD")){
+                            String newRecord = record.substring(9);
+                            addRecord(newRecord);
+                            System.out.println(newRecord);
+                            newRecord = record.substring(9 + tokens[2].length() + 1);
+                            //connectionPoint.notifyUpdate(ID, "UPDATE ADD", newRecord, "");
+                            connectionPoint.handleStats("ADD", "", newRecord); 
+                        }else{
+                            String oldRecord = getRecord(tokens[1]);
+                            String newRecord = record.substring(5+tokens[1].length()+1);
+                            updateRequest(record);
+                            connectionPoint.notifyUpdate(ID, "UPDATE", oldRecord, newRecord);
+                            connectionPoint.handleStats("UPDATE", oldRecord, newRecord);
+                        }
                     }
                 }
             }
@@ -103,6 +115,69 @@ public class ConnectionHandler extends Thread implements Serializable {
             e.printStackTrace();
         }
                 
+    }
+    
+    private void addRecord(String record){
+        String query = "INSERT INTO PARTICIPANTS (ID, NAME, GENDER, BIRTHDAY, HEIGHT, WEIGHT, SPORT, COUNTRY)"
+                            + "VALUES(?, ?, ?, ?, ?, ?, ?, ?)";
+        
+        float height = 0f, weight = 0f;
+        String name = " ", country = " ", birthday = " ", sport = " ", gender = " ";
+        int ID = 0;
+        
+        try{
+            PreparedStatement pState = null;
+            pState = connection.prepareStatement(query);
+            String[] tokens = record.split(" ");
+            for(int i = 0; i < tokens.length; i++){
+                switch(i){
+                    case 0: ID = Integer.parseInt(tokens[0]);
+                        break;
+                    case 1:
+                        name = tokens[1] + " " + tokens[2];
+                        break;
+                    case 2: gender = tokens[3];
+                        break;
+                    case 3: birthday = tokens[4];
+                        break;
+                    case 4: height = Float.parseFloat(tokens[5]);
+                        break;
+                    case 5: weight = Float.parseFloat(tokens[6]);
+                        break;
+                    case 6: country = tokens[7];
+                        break;
+                    case 7:
+                        if(tokens.length > 9){
+                            sport = tokens[8] + " " +  tokens[9];
+                        }else{
+                            sport = tokens[8];
+                        }
+                        break;
+                }
+
+            }
+            pState.setInt(1, ID);
+            pState.setString(2, name);
+            pState.setString(3, gender);
+            pState.setString(4, birthday);
+            pState.setFloat(5, height);
+            pState.setFloat(6, weight);
+            pState.setString(7, sport);
+            pState.setString(8, country);
+            pState.executeUpdate();                    
+            
+            pState.close();
+            out.write(CREATED);
+            out.write("\n");
+            out.flush();
+        }catch(SQLException s){
+            s.printStackTrace();
+            out.write(SERVER_ERROR);
+            out.write("\n");
+            out.flush();
+        }
+        out.write("\n");
+        out.flush();
     }
     
     private String getRecord(String ID){
@@ -234,6 +309,8 @@ public class ConnectionHandler extends Thread implements Serializable {
             out.write("\n");
             out.flush();
         }
+        out.write("\n");
+        out.flush();
         
     }
 }
