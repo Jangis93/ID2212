@@ -279,7 +279,7 @@ public class ConnectionHandler extends Thread implements Serializable {
         
     }
     
-    private void updateRequest(String input){
+    private synchronized void updateRequest(String input){
         String[] tokens = input.split(" ");
         String oldID = tokens[1];
         String sport = "";

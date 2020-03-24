@@ -70,7 +70,7 @@ public class Server {
         }
     }
     
-    public void notifyUpdate(int ID, String request, String oldRecord, String newRecord){
+    public synchronized void notifyUpdate(int ID, String request, String oldRecord, String newRecord){
         
         for(int i = 0; i < handlers.size(); i++){
             if(i != ID){
@@ -165,7 +165,9 @@ public class Server {
                         break;
                     case 8:
                         if(tokensOld.length == tokensNew.length){
-                            if(tokensOld.length == 8){
+                            int a = tokensOld.length;
+                            int b = tokensNew.length;
+                            if(tokensOld.length == 9){
                                 if(!tokensOld[i].equals(tokensNew[i])){
                                     stats.updateSport(tokensOld[i], 0);
                                     stats.updateSport(tokensNew[i], 1);
