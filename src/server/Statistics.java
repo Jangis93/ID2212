@@ -88,7 +88,6 @@ public class Statistics {
         return this.numberOfParticipants;
     }
     
-    
     public Hashtable<String, Integer> getCountriesStats(){
         return this.countries;
     }
@@ -127,6 +126,7 @@ public class Statistics {
             this.sports.put(sport, sports.get(sport)+1);
         }
     }
+    
     public void updateCountry(String country, int option){
         
         if(option == 0){

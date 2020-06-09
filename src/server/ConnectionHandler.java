@@ -8,7 +8,6 @@ package server;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.Serializable;
 import java.net.Socket;
@@ -17,10 +16,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.StringTokenizer;
-import static server.Server.connection;
 
 /**
  *
@@ -258,7 +254,6 @@ public class ConnectionHandler extends Thread implements Serializable {
         }
 
     }
-    
     
     private void deleteRequest(String record){
         String ID = record;

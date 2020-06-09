@@ -21,6 +21,16 @@ import javax.swing.JPanel;
 import javax.swing.table.DefaultTableModel;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
+import chatroomClient.ChatRegPage;
+import chatroomClient.User;
+import chatroomServer.RGCenterInterface;
+import java.net.MalformedURLException;
+
+import java.rmi.RemoteException;
+import java.rmi.Naming;
+import java.rmi.NotBoundException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -33,21 +43,32 @@ public class GUIController extends Thread {
     private PartPage pPage;
     private StatsPage sPage;
     private AddPage aPage;
+    public ChatRegPage cRegPage;
     
     public boolean connected;
+    private boolean chatRegistated;
     private final int PORT = 4444;
     
     private ClientHandler handler;
     private String chosenRecord;
+    
+    private User user;
+    private RGCenterInterface rgCenter;
         
-    GUIController() {
+    GUIController() throws NotBoundException, MalformedURLException, RemoteException {
         mPage = new MainPage();
         pPage = new PartPage();
         sPage = new StatsPage();
         aPage = new AddPage();
+        cRegPage = new ChatRegPage();
         
         data = new ArrayList();
         updateList = new ConcurrentLinkedDeque<String>(); 
+        
+        rgCenter = (RGCenterInterface) Naming.lookup("rmi://localhost:8888/rgcenter");
+        
+        chatRegistated = false;
+        user = new User(this);
     }
     
     @Override
@@ -333,6 +354,15 @@ public class GUIController extends Thread {
             }
         });
         
+        mPage.chatBtn.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e){
+                int[] frameSize = new int[]{400, 500};
+                startNewFrame(cRegPage, "Put in user information", frameSize);
+                mPage.chatBtn.setSelected(false);            
+            }
+        });
+        
         pPage.nxtBtn.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e){
@@ -442,6 +472,50 @@ public class GUIController extends Thread {
                     
                 }
                 pPage.updtBtn.setSelected(false);
+            }
+        });
+        
+        cRegPage.regBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e){
+                String name = cRegPage.nameField.getText();
+                if(!chatRegistated){
+                    if(name.length() > 0){
+                        user.addName(name);
+
+                        chatRegistated = true;
+                        cRegPage.regBtn.setText("Unregister");
+                        cRegPage.regBtn.setSelected(false);
+                        try {
+                            rgCenter.registerUser(user);
+                            // TODO: register in registrationCenter!
+                        } catch (RemoteException ex) {
+                            Logger.getLogger(GUIController.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                    }
+                }else {
+                    chatRegistated = false;
+                    cRegPage.regBtn.setText("Register");
+                    cRegPage.regBtn.setSelected(false);
+                    cRegPage.nameField.setText("");
+                    
+                    // TODO: unregister in registrationCenter!
+                }
+ 
+            }
+        });
+        
+        cRegPage.regRoomBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e){
+                String chatRoom = cRegPage.roomTitleField.getText();
+                if(chatRegistated){
+                    
+                }else {
+                    // should not be able to create a room with remote interface
+                    // notify user that it has not registered
+                    System.out.println("user has not registated");
+                }
             }
         });
     }   

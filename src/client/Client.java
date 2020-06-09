@@ -4,8 +4,13 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.MalformedURLException;
 import java.net.Socket;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JFrame;
 
 /*
@@ -46,9 +51,17 @@ public class Client {
         cFrame.startBtn.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e){
-                GUIController gui = new GUIController();
-                gui.start();
-                cFrame.startBtn.setSelected(false);
+                try {
+                    GUIController gui = new GUIController();
+                    gui.start();
+                    cFrame.startBtn.setSelected(false);
+                } catch (NotBoundException ex) {
+                    Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (MalformedURLException ex) {
+                    Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (RemoteException ex) {
+                    Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
         });
         

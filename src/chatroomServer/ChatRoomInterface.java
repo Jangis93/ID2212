@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package chatroom;
+package chatroomServer;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
@@ -12,6 +12,9 @@ import java.rmi.RemoteException;
  *
  * @author Michaela
  */
-public interface RGCenterInterface {
+public interface ChatRoomInterface extends Remote{
+    
+    public void createRoom() throws RemoteException;
+    public void destroyRoom()throws RemoteException;
     
 }
