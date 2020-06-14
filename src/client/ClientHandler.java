@@ -28,19 +28,23 @@ public class ClientHandler extends Thread{
     private boolean running;
     
     private GUIController gui;
-    private ConcurrentLinkedDeque<String> requestQueue;
+    //private ConcurrentLinkedDeque<String> requestQueue;
+    private ConcurrentLinkedDeque<RequestItem> requestQueue;
+    
+    private Logger logger = Logger.getLogger(ClientHandler.class.getName());
     
     public ClientHandler(Socket socket, GUIController gui){
         this.socket = socket;
         this.gui = gui;
-        requestQueue = new ConcurrentLinkedDeque<String>(); 
+        requestQueue = new ConcurrentLinkedDeque<>(); 
         running = true;
         
         try{
             out = new PrintWriter(socket.getOutputStream());
             in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         }catch(IOException e){
-            System.out.println("Could not setup in/out");
+            logger.log(Level.WARNING, "Could not setup communication links for server communication");
+            // TODO: retry or inform user of the problem
         }
     }
     
@@ -50,7 +54,7 @@ public class ClientHandler extends Thread{
             in.close();
             socket.close(); 
         }catch(IOException e){
-            e.printStackTrace();
+            logger.log(Level.INFO, "Tried to close socket when exception was thrown: ", e);
         }
         running = false;
     }
@@ -59,6 +63,7 @@ public class ClientHandler extends Thread{
         return running;
     }
     
+    /*
     public void run(){
 
         String answer = "";
@@ -127,14 +132,7 @@ public class ClientHandler extends Thread{
                             }
                         }).start();
                     }
-                    /*
-                    else{
-                        System.err.println("closing socket");
-                        in.close();
-                        out.close();
-                        socket.close();
-                    }
-                    */
+
                 }
             }catch(IOException e){
                 
@@ -142,26 +140,86 @@ public class ClientHandler extends Thread{
 
         }
     }
+    */
+    
+    public void run(){
+        String request = "";
+        String payLoad = "";
+        String serverRespons = "";
+        String intermediateAnswer = "";
+        
+        while(running){
+            
+            // check the queue
+            if(!requestQueue.isEmpty()){
+                RequestItem newRequest = requestQueue.getLast();
+                
+                logger.log(Level.INFO, "Request read from request queue: ", newRequest.getRequest());
+                
+                if(request.split(" ")[0].equals("GET")){
+                    request = newRequest.getRequest();
+                }else{
+                    request = newRequest.toString();
+                }
+                writeSocket(request);
+            }
+                
+            try {
+                if(in.ready() && (intermediateAnswer = in.readLine()) != null){
+                    logger.log(Level.INFO, "Server respons read: ", intermediateAnswer);
+
+                    if(intermediateAnswer.equals("HTTP/1.0 200 OK")){
+                        writeSocket("HTTP/1.0 100 CONTINUE");
+
+                        while((intermediateAnswer = in.readLine()) != null){
+                            if(intermediateAnswer.isEmpty()){
+                                break;
+                            }else if(intermediateAnswer.equals("HTTP/1.0 204 NO CONTENT") 
+                                    || intermediateAnswer.equals("HTTP/1.0 201 CREATED") ){
+                                serverRespons = " ";
+                                // maybe break
+                            }
+                            else{
+                                serverRespons += intermediateAnswer + "\n";
+                            }
+                        }
+
+                        clientCall(requestQueue.pollLast().getRequest(), serverRespons);
+
+
+                    }else if(intermediateAnswer.equals("HTTP/1.0 UPDATE")){
+                        while((intermediateAnswer = in.readLine()) != null){
+                            if(intermediateAnswer.isEmpty()){
+                                    break;
+                            }else{
+                                serverRespons += intermediateAnswer + "\n";
+                            }   
+                        }
+
+                        clientCall("UPDATE", serverRespons);
+                    }
+                }
+
+            } catch(IOException e) {
+                logger.log(Level.WARNING, "Exception occured when reading respons from server: ", e);
+            }
+            
+        }
+    }
     
     /*
     Method for GUI controller to call when needing to do invoke server communication
     */
     public void serverCall(String request, String payLoad){
-        requestQueue.addFirst(request);
-        if(request.split(" ")[0].equals("GET")){
-            out.write(request);
-            out.write("\n");
-            out.flush();
-        }else{
-            out.write(request + " " + payLoad);
-            out.write("\n");
-            out.flush();
-        }
+        requestQueue.addFirst(new RequestItem(request, payLoad));
+    }
+    
+    private void clientCall(String request, String payLoad){
+        gui.serverResponse(request, payLoad);
     }
     
     private void writeSocket(String request){
-        out.write(request);
-        out.write("\n");
+        out.println(request);
         out.flush();
     }
     
